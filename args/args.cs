@@ -8,10 +8,11 @@ namespace args
 {
     public class Args
     {
-        //int schemaFieldCount = 3;
+        int schemaFieldCount = 4;
         int schemaNamePosition = 0;
         int schemaTypePosition = 1;
-        int schemaDefaultValuePosition = 2;
+        //int schemaValueTypePosition = 2;
+        int schemaDefaultValuePosition = 3;
         int argNamePosition = 0;
         int argValuePosition = 1;
         int argTypePosition = 2;
@@ -56,15 +57,15 @@ namespace args
                 string[] tokenizedSchema = schema.Split(',');
 
                 int elementCount = tokenizedSchema.Count();
-                if (elementCount % 3 == 0)
-                    schemaArgumentCount = elementCount / 3;
+                if (elementCount % schemaFieldCount == 0)
+                    schemaArgumentCount = elementCount / schemaFieldCount;
                 else
                     throw new System.ArgumentException("Schema requires a name, type and default value for all parameters.");
 
-                mySchema = new string[schemaArgumentCount, 3];
+                mySchema = new string[schemaArgumentCount, schemaFieldCount];
                 for (int i = 0; i < schemaArgumentCount; i++)
                 {
-                    int offset = i * 3;
+                    int offset = i * schemaFieldCount;
                     mySchema[i, schemaNamePosition] = tokenizedSchema[offset + schemaNamePosition].Trim();
                     mySchema[i, schemaTypePosition] = tokenizedSchema[offset + schemaTypePosition].Trim();
                     mySchema[i, schemaDefaultValuePosition] = tokenizedSchema[offset + schemaDefaultValuePosition].Trim();
@@ -74,7 +75,7 @@ namespace args
 
         public void ParseArguments(string arguments)
         {
-            myArguments = new string[schemaArgumentCount, 3];
+            myArguments = new string[schemaArgumentCount, schemaFieldCount];
             for(int i=0; i<schemaArgumentCount; i++)
             {
                 myArguments[i, argNamePosition] = mySchema[i, schemaNamePosition];

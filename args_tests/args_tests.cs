@@ -6,11 +6,41 @@ namespace args
 {
     public static class Constants
     {
+
+        #region SchemaSampleValues
+        public static string SampleValue_Argument
+        {
+            get { return "argument"; }
+        }
+        public static string SampleValue_Type
+        {
+            get { return "type"; }
+        }
+        public static string SampleValue_ValueType
+        {
+            get { return "valueType"; }
+        }
+        public static string SampleValue_DefaultValue
+        {
+            get { return "defaultValue"; }
+        }
+        public static string SampleArguments
+        {
+            get
+            {
+                string value = Constants.SampleValue_Argument
+                    + ", " + Constants.SampleValue_Type
+                    + ", " + Constants.SampleValue_ValueType
+                    + ", " + Constants.SampleValue_DefaultValue;
+                return value;
+            }
+        }
+        #endregion SchemaSampleValues
+
         public static string InitialSchema
         {
-            get { return "l,bool,false,p,int,8080,d,string, /usr/logs"; }
+            get { return "l, bool, single, false, p, int, single, 8080, d, string, single, /usr/logs"; }
         }
-
         public static string InitialArguments
         {
             // -l = logging <bool>
@@ -18,13 +48,33 @@ namespace args
             // -d = directory <string>
             get { return "-l -p 8080 -d /usr/logs"; }
         }
+
+        public static string GroupSchema
+        {
+            get { return "g, string, group, empty, d, int, group, empty"; }
+        }
+        public static string GroupArguments
+        {
+            get { return "-g this, is, a list, -d 1, 2, -3, 5"; }
+        }
+    }
+
+
+    [TestClass]
+    public class SchemaGroupCreationTests
+    {
+        [TestMethod]
+        public void ShouldDetectTypeGroup()
+        {
+            Args o = new Args(Constants.GroupSchema);
+            Assert.AreEqual(2, o.SchemaArgumentCount);
+            //Assert.AreEqual(2, o.SchemaGroupArgumentCount);
+        }
     }
 
     [TestClass]
-    public class SchemaCreationTests
+    public class SchemaInitialCreationTests
     {
-        string schema_finalexam = Constants.InitialSchema;
-
         [TestMethod]
         public void ZeroArgOnSchemaShouldFind_Zero_SchemaArgs()
         {
@@ -35,39 +85,39 @@ namespace args
         [TestMethod]
         public void OneArgOnSchemaShouldFind_One_SchemaArgs()
         {
-            Args o = new Args("argument, type, value");
+            Args o = new Args(Constants.SampleArguments);
             Assert.AreEqual(1, o.SchemaArgumentCount);
         }
 
         [TestMethod]
         public void ThreeArgOnSchemaShouldFind_Three_SchemaArgs()
         {
-            Args o = new Args(schema_finalexam);
+            Args o = new Args(Constants.InitialSchema);
             Assert.AreEqual(3, o.SchemaArgumentCount);
         }
 
         [TestMethod]
         public void ShouldBeAbleToGetArgumentName()
         {
-            Args o = new Args("argument, type, defaultValue");
+            Args o = new Args(Constants.SampleArguments);
             string varName = o.MySchema[0, 0];
-            Assert.AreEqual("argument", varName);
+            Assert.AreEqual(Constants.SampleValue_Argument, varName);
         }
 
         [TestMethod]
         public void ShouldBeAbleToGetArgumentType()
         {
-            Args o = new Args("argument, type, defaultValue");
+            Args o = new Args(Constants.SampleArguments);
             string argumentType = o.MySchema[0, 1];
-            Assert.AreEqual("type", argumentType);
+            Assert.AreEqual(Constants.SampleValue_Type, argumentType);
         }
 
         [TestMethod]
         public void ShouldBeAbleToGetArgumentDefaultValue()
         {
-            Args o = new Args("argument, type, defaultValue");
-            string argumentDefaultValue = o.MySchema[0, 2];
-            Assert.AreEqual("defaultValue", argumentDefaultValue);
+            Args o = new Args(Constants.SampleArguments);
+            string argumentDefaultValue = o.MySchema[0, 3];
+            Assert.AreEqual(Constants.SampleValue_DefaultValue, argumentDefaultValue);
         }
 
         [TestMethod]
@@ -76,7 +126,7 @@ namespace args
         {
             try
             {
-                Args o = new Args("argument1, type1, defaultValue1, oops");
+                Args o = new Args("argument1, type1, notEnoughArguments");
                 Assert.Fail("Expected exception was not thrown");
             }
             catch(ArgumentException ex)
@@ -91,8 +141,8 @@ namespace args
         [TestMethod]
         public void ShouldBeAbleToCheckAllNineElements()
         {
-            Args o = new Args(schema_finalexam);
-            string thirdDefaultValue = o.MySchema[2, 2];
+            Args o = new Args(Constants.InitialSchema);
+            string thirdDefaultValue = o.MySchema[2, 3];
             Assert.AreEqual("/usr/logs", thirdDefaultValue);
         }
 
