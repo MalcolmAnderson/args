@@ -90,12 +90,7 @@ namespace args
                 string curElement = tokenizedArguments[i];
                 if (curElement.Length==2 && curElement.Substring(0,1)=="-")
                 {
-                    //string argName = curElement.Substring(1, 1);
                     myArguments[0, argValuePosition] = "true";
-
-                    //find argName in Schema
-                    //set type to type in schema
-                    // if boolean set value to true
                 }
                     
             }
@@ -108,7 +103,6 @@ namespace args
                 if (mySchema[i, schemaNamePosition] == argumentName)
                 {
                     return myArguments[i, argValuePosition];
-                    //return mySchema[i, GetArgumentValue];
                 }
 
             }
@@ -122,7 +116,6 @@ namespace args
                 if (mySchema[i, schemaNamePosition] == argumentName)
                 {
                     return myArguments[i, argTypePosition];
-                    //return mySchema[i, GetArgumentValue];
                 }
 
             }

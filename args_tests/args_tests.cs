@@ -6,12 +6,12 @@ namespace args
 {
     public static class Constants
     {
-        public static string FullSchema
+        public static string InitialSchema
         {
-            get { return "l,bool,false,p,int,8080,d,string,'/usr/logs'"; }
+            get { return "l,bool,false,p,int,8080,d,string, /usr/logs"; }
         }
 
-        public static string FullArguments
+        public static string InitialArguments
         {
             // -l = logging <bool>
             // -p = port <int>
@@ -23,7 +23,7 @@ namespace args
     [TestClass]
     public class SchemaCreationTests
     {
-        string schema_finalexam = Constants.FullSchema;
+        string schema_finalexam = Constants.InitialSchema;
 
         [TestMethod]
         public void ZeroArgOnSchemaShouldFind_Zero_SchemaArgs()
@@ -93,7 +93,7 @@ namespace args
         {
             Args o = new Args(schema_finalexam);
             string thirdDefaultValue = o.MySchema[2, 2];
-            Assert.AreEqual("'/usr/logs'", thirdDefaultValue);
+            Assert.AreEqual("/usr/logs", thirdDefaultValue);
         }
 
     }
@@ -108,7 +108,7 @@ namespace args
         public void Setup()
         {
             arguments = "";
-            string schema = Constants.FullSchema;
+            string schema = Constants.InitialSchema;
             o = new Args(schema);
         }
 
@@ -126,8 +126,6 @@ namespace args
             o.ParseArguments("-l");
             string loggingValue = o.GetArgumentValue("l");
             Assert.AreEqual("true", loggingValue);
-            //string loggingType = o.GetArgumentType("l");
-            //Assert.AreEqual("bool", loggingValue);
         }
 
         [TestMethod]
@@ -136,8 +134,6 @@ namespace args
             o.ParseArguments("");
             string loggingValue = o.GetArgumentValue("l");
             Assert.AreEqual("false", loggingValue);
-            //string loggingType = o.GetArgumentType("l");
-            //Assert.AreEqual("bool", loggingValue);
         }
 
         [TestMethod]
@@ -156,6 +152,26 @@ namespace args
                 Assert.AreEqual(expectedExceptionString, ex.Message);
                 throw;
             }
+        }
+
+        [TestMethod]
+        public void ShouldBeAbleToGetLoggingType()
+        {
+            o.ParseArguments("-l");
+            string loggingType = o.GetArgumentType("l");
+            Assert.AreEqual("bool", loggingType);
+        }
+
+        [TestMethod]
+        public void InitialTestFullArgumentList()
+        {
+            o.ParseArguments(Constants.InitialArguments);
+            Assert.AreEqual("true", o.GetArgumentValue("l"));
+            Assert.AreEqual("bool", o.GetArgumentType("l"));
+            Assert.AreEqual("8080", o.GetArgumentValue("p"));
+            Assert.AreEqual("int", o.GetArgumentType("p"));
+            Assert.AreEqual("/usr/logs", o.GetArgumentValue("d"));
+            Assert.AreEqual("string", o.GetArgumentType("d"));
         }
     }
 }
