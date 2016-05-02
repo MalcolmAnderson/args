@@ -6,32 +6,14 @@ using System.Threading.Tasks;
 
 namespace args
 {
-    public class Args
+
+    public class Schema : ISchema
     {
         int schemaFieldCount = 4;
         int schemaNamePosition = 0;
         int schemaTypePosition = 1;
         //int schemaValueTypePosition = 2;
         int schemaDefaultValuePosition = 3;
-        int argNamePosition = 0;
-        int argValuePosition = 1;
-        int argTypePosition = 2;
-        //string argName;
-        //string argType;
-        //string argValue;
-
-        private string[,] myArguments;
-        public string[,] MyProperty
-        {
-            get { return myArguments; }
-        }
-
-        private int argumentCount = 0;
-        public int ArgumentCount
-        {
-            get { return argumentCount; }
-        }
-
 
         private string[,] mySchema;
         public string[,] MySchema
@@ -40,6 +22,19 @@ namespace args
         }
 
 
+
+        public string[,] GetArguments(int argNamePosition, int argTypePosition, int argValuePosition)
+        {
+            string[,] myArguments = new string[schemaArgumentCount, schemaFieldCount];
+            for (int i = 0; i < schemaArgumentCount; i++)
+            {
+                myArguments[i, argNamePosition] = mySchema[i, schemaNamePosition];
+                myArguments[i, argTypePosition] = mySchema[i, schemaTypePosition];
+                myArguments[i, argValuePosition] = mySchema[i, schemaDefaultValuePosition];
+            }
+            return myArguments;
+        }
+
         private int schemaArgumentCount = 0;
         public int SchemaArgumentCount
         {
@@ -47,14 +42,14 @@ namespace args
         }
 
 
-        public Args(string schema)
+        public Schema(string schemaStringToLoad)
         {
             schemaArgumentCount = 0;
-            if (schema.Length == 0)
+            if (schemaStringToLoad.Length == 0)
                 return;
             else
             {
-                string[] tokenizedSchema = schema.Split(',');
+                string[] tokenizedSchema = schemaStringToLoad.Split(',');
 
                 int elementCount = tokenizedSchema.Count();
                 if (elementCount % schemaFieldCount == 0)
@@ -73,16 +68,68 @@ namespace args
             }
         }
 
+        public string GetArgumentType(string argumentName)
+        {
+            for (int i = 0; i < schemaArgumentCount; i++)
+            {
+                if (mySchema[i, schemaNamePosition] == argumentName)
+                {
+                    return mySchema[i, schemaTypePosition];
+                }
+
+            }
+            throw new System.ArgumentException("\"" + argumentName + "\" Not Found In Schema");
+        }
+
+    }
+
+
+
+    public class Parser
+    {
+        ISchema schema;
+        int argNamePosition = 0;
+        int argValuePosition = 1;
+        int argTypePosition = 2;
+        //string argName;
+        //string argType;
+        //string argValue;
+
+
+
+        private string[,] myArguments;
+        public string[,] MyProperty
+        {
+            get { return myArguments; }
+        }
+
+        private int argumentCount = 0;
+        public int ArgumentCount
+        {
+            get { return argumentCount; }
+        }
+
+
+        private void setDefaultArgumentValues(ISchema schema)
+        {
+            myArguments = schema.GetArguments(argNamePosition, argTypePosition, argValuePosition);
+        }
+
+        public Parser(ISchema loadThisSchema)
+        {
+            schema = loadThisSchema;
+            setDefaultArgumentValues(schema);
+        }
+
+        public Parser(string schemaString)
+        {
+            schema = new Schema(schemaString);
+            setDefaultArgumentValues(schema);
+        }
+
+
         public void ParseArguments(string arguments)
         {
-            myArguments = new string[schemaArgumentCount, schemaFieldCount];
-            for(int i=0; i<schemaArgumentCount; i++)
-            {
-                myArguments[i, argNamePosition] = mySchema[i, schemaNamePosition];
-                myArguments[i, argTypePosition] = mySchema[i, schemaTypePosition];
-                myArguments[i, argValuePosition] = mySchema[i, schemaDefaultValuePosition];
-            }
-           
 
             string[] tokenizedArguments = arguments.Split(' ');
             int argumentCount = tokenizedArguments.Count();
@@ -93,15 +140,14 @@ namespace args
                 {
                     myArguments[0, argValuePosition] = "true";
                 }
-                    
             }
         }
 
         public string GetArgumentValue(string argumentName)
         {
-            for (int i = 0; i < schemaArgumentCount; i++)
+            for (int i = 0; i < schema.SchemaArgumentCount; i++)
             {
-                if (mySchema[i, schemaNamePosition] == argumentName)
+                if (myArguments[i, argNamePosition] == argumentName)
                 {
                     return myArguments[i, argValuePosition];
                 }
@@ -112,15 +158,8 @@ namespace args
 
         public string GetArgumentType(string argumentName)
         {
-            for (int i = 0; i < schemaArgumentCount; i++)
-            {
-                if (mySchema[i, schemaNamePosition] == argumentName)
-                {
-                    return myArguments[i, argTypePosition];
-                }
-
-            }
-            throw new System.ArgumentException("\"" + argumentName + "\" Not Found In Schema");
+            return schema.GetArgumentType(argumentName);
         }
+
     }
 }
